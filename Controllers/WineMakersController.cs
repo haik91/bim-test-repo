@@ -51,6 +51,8 @@ namespace WinemakerAPI.Controllers
         /// <response code="200">Returns the details of the requested wine maker.</response>
         /// <response code="404">Returns a not found response if the wine maker with the specified ID does not exist.</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<GetWineMaker>> GetWinemaker(int id)
         {
             var wineMaker = await _context.WineMakers.Include(w => w.WineBottles)
@@ -75,6 +77,8 @@ namespace WinemakerAPI.Controllers
         /// <response code="201">Returns the details of the newly created wine maker and the location where it can be retrieved.</response>
         /// <response code="400">Returns a bad request response if the wine maker is null or if a wine maker with the same name already exists.</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<GetWineMaker>> PostWineMaker(PostWineMaker postWineMaker)
         {
             if (postWineMaker is null)
@@ -108,6 +112,9 @@ namespace WinemakerAPI.Controllers
         /// <response code="204">Returns a no content response indicating that the deletion was successful.</response>
         /// <response code="404">Returns a not found response if no wine maker with the specified ID exists.</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+
         public async Task<IActionResult> DeleteWinemaker(int id)
         {
             var wineMaker = await _context.WineMakers.FindAsync(id);
@@ -120,6 +127,39 @@ namespace WinemakerAPI.Controllers
             _context.WineMakers.Remove(wineMaker);
             await _context.SaveChangesAsync();
 
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Updates the details of an existing wine maker.
+        /// </summary>
+        /// <param name="id">The unique identifier of the wine maker to update.</param>
+        /// <param name="updateWineMaker">An object containing the updated wine maker details.</param>
+        /// <response code="200">The wine maker was successfully updated.</response>
+        /// <response code="400">The ID in the URL does not match the ID in the request body or the data provided is invalid.</response>
+        /// <response code="404">The wine maker with the specified ID was not found.</response>
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> PutWineMaker(int id, UpdateWineMaker updateWineMaker)
+        {
+            if (id != updateWineMaker.Id)
+            {
+                return BadRequest("The wine maker you requested to update does not match the id");
+            }
+
+            var wineMaker = _context.WineMakers.Find(id);
+
+            if (wineMaker is null)
+            {
+                return NotFound();
+            }
+
+            _context.Entry(wineMaker).State = EntityState.Modified;
+            wineMaker.Name = updateWineMaker.Name;
+            wineMaker.Address = updateWineMaker.Address;
+            await _context.SaveChangesAsync();
             return NoContent();
         }
     }
