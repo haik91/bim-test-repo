@@ -11,6 +11,10 @@ namespace WinemakerAPI
             // winemakers mappings
             CreateMap<PostWineMaker, WineMaker>();
             CreateMap<WineMaker, GetWineMaker>();
+
+            //winebottle mappings 
+            CreateMap<PostWineBottle, WineBottle>();
+            CreateMap<WineBottle, GetWineBottle>();
         }
     }
 }
